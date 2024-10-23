@@ -8,6 +8,7 @@ namespace WebApi.Controllers
 {
     [ApiController]
     [Route("api/auth")]
+    [Authorize(Roles = "Admin")]
     public class AdminController : ControllerBase
     {
         private readonly DataContext _context;
@@ -16,7 +17,6 @@ namespace WebApi.Controllers
             _context = context;
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpGet("admin/leave")]
         public async Task<IActionResult> GetAllLeaveApplications()
         {
@@ -26,7 +26,6 @@ namespace WebApi.Controllers
             return Ok(applications);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPost("admin/leave/approve")]
         public async Task<IActionResult> ApproveLeave(ApproveLeaveDto approveLeaveDto)
         {
@@ -42,7 +41,6 @@ namespace WebApi.Controllers
             return Ok("Leave application approved");
         }
 
-        [Authorize(Roles ="Admin")]
         [HttpGet("/employees")]
         public async Task<IActionResult> GetEmployees()
         {
@@ -52,7 +50,6 @@ namespace WebApi.Controllers
             return Ok(employees);
         }
 
-        [Authorize(Roles ="Admin")]
         [HttpGet("/application")]
         public async Task<IActionResult> GetLeaveApplications()
         {
@@ -73,6 +70,56 @@ namespace WebApi.Controllers
             });
             return Ok(applicationsDto);
         }
+
+        [HttpGet("leave/approved")]
+        public async Task<IActionResult> GetApprovedLeave()
+        {
+            var result = await _context.LeaveApplications
+               .Where(l => l.Status == "Approved")
+                .Include(l => l.User)
+                .ToListAsync();
+            
+            var applicationsDto = result.Select(a => new LeaveApplicationDto
+            {
+                StartDate = a.StartDate.ToString("yyyy/MM/dd"),
+                EndDate = a.EndDate.ToString("yyyy/MM/dd"),
+                LeaveType = a.LeaveType.ToString(),
+                Username = a.User.Username
+            });
+            return Ok(applicationsDto);
+        }
+
+        [HttpGet("leave/declined")]
+        public async Task<IActionResult> GetDeclinedLeave()
+        {             var result = await _context.LeaveApplications
+               .Where(l => l.Status == "Declined")
+                .Include(l => l.User)
+                .ToListAsync();
+            
+            var applicationsDto = result.Select(a => new LeaveApplicationDto
+            {
+                StartDate = a.StartDate.ToString("yyyy/MM/dd"),
+                EndDate = a.EndDate.ToString("yyyy/MM/dd"),
+                LeaveType = a.LeaveType.ToString(),
+                Username = a.User.Username
+            });
+            return Ok(applicationsDto);
+        }
+
+        [HttpGet("leave/stats")]
+        public async Task<IActionResult> GetLeaveStats()
+        {
+            var stats = await _context.LeaveApplications
+                .GroupBy(l => l.LeaveType)
+                .Select(g => new
+                {
+                    LeaveType = g.Key.ToString(),
+                    Count = g.Count()
+                })
+                .ToListAsync();
+            return Ok(stats);
+        }
+
     }
 }
 
