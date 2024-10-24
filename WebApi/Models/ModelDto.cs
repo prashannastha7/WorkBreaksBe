@@ -30,6 +30,7 @@ namespace WebApi.Models
         public string EndDate { get; set; } // Accept as string
         public string LeaveType { get; set; }
         public string Username { get; set; }
+        public int LeaveApplicationId { get; set; }
     }
 
     public class ApproveLeaveDto

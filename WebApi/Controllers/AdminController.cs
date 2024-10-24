@@ -17,7 +17,7 @@ namespace WebApi.Controllers
             _context = context;
         }
 
-        [HttpPost("admin/leave/approve")]
+        [HttpPut("leave/approve")]
         public async Task<IActionResult> ApproveLeave(ApproveLeaveDto approveLeaveDto)
         {
             //FindAsync :  Retrieves an entity by its primary key.
@@ -26,10 +26,31 @@ namespace WebApi.Controllers
             if (leave == null)
                 return BadRequest("Leave application not found");
 
-            leave.Status = approveLeaveDto.Status;
-             _context.SaveChanges();
+            if (approveLeaveDto.Status != "Approved" && approveLeaveDto.Status != "Declined")
+                return BadRequest("Invalid status value");
 
-            return Ok("Leave application approved");
+            leave.Status = approveLeaveDto.Status;
+             await _context.SaveChangesAsync();
+
+            return Ok("Leave application updated succesfully");
+        }
+
+        [HttpPut("leave/decline")]
+        public async Task<IActionResult> DeclineLeave(ApproveLeaveDto approveLeaveDto)
+        {
+            //FindAsync :  Retrieves an entity by its primary key.
+            var leave = await _context.LeaveApplications.FindAsync(approveLeaveDto.LeaveId);
+
+            if (leave == null)
+                return BadRequest("Leave application not found");
+
+            if (approveLeaveDto.Status != "Approved" && approveLeaveDto.Status != "Declined")
+                return BadRequest("Invalid status value");
+
+            leave.Status = approveLeaveDto.Status;
+            await _context.SaveChangesAsync();
+
+            return Ok("Leave application updated succesfully");
         }
 
         [HttpGet("/employees")]
@@ -61,6 +82,7 @@ namespace WebApi.Controllers
             //Instead of fetching leave applications and then fetching user details in a separate call,
             //both sets of data are retrieved in one go.
             var applications = await _context.LeaveApplications
+                .Where(u => u.Status == "Pending")
                 .Include(l => l.User)
                 .ToListAsync();
             //This ensures that the data sent to the client meets the expected format.
@@ -70,7 +92,8 @@ namespace WebApi.Controllers
                 StartDate = a.StartDate.ToString("yyyy/MM/dd"),
                 EndDate = a.EndDate.ToString("yyyy/MM/dd"),
                 LeaveType = a.LeaveType.ToString(),
-                Username = a.User.Username
+                Username = a.User.Username,
+                LeaveApplicationId = a.LeaveApplicationId
             });
             return Ok(applicationsDto);
         }
