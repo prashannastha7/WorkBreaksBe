@@ -17,15 +17,6 @@ namespace WebApi.Controllers
             _context = context;
         }
 
-        [HttpGet("admin/leave")]
-        public async Task<IActionResult> GetAllLeaveApplications()
-        {
-            var applications = await _context.LeaveApplications
-                .Include(l => l.User)
-                .ToListAsync();
-            return Ok(applications);
-        }
-
         [HttpPost("admin/leave/approve")]
         public async Task<IActionResult> ApproveLeave(ApproveLeaveDto approveLeaveDto)
         {
@@ -48,6 +39,19 @@ namespace WebApi.Controllers
                 .Where(u => u.Role == UserRole.Employee)
                 .ToListAsync();
             return Ok(employees);
+        }
+
+        [HttpDelete("users/{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+                return BadRequest("User not found");
+
+            _context.Users.Remove(user);
+            _context.SaveChanges();
+
+            return Ok("User deleted successfully");
         }
 
         [HttpGet("/application")]
@@ -119,7 +123,5 @@ namespace WebApi.Controllers
                 .ToListAsync();
             return Ok(stats);
         }
-
     }
 }
-
