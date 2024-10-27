@@ -67,7 +67,7 @@ namespace WebApi.Controllers
 
             var token = GenerateJwtToken(user);
 
-            return Ok(new { Message = "Login Successful", Token = token, Role = user.Role });
+            return Ok(new { Message = "Login Successful", Token = token, Role = user.Role, user = user.Username });
         }
 
         private string GenerateJwtToken(User user)
