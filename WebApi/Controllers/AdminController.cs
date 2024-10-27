@@ -132,7 +132,7 @@ namespace WebApi.Controllers
             });
             return Ok(applicationsDto);
         }
-
+        
         [HttpGet("leave/stats")]
         public async Task<IActionResult> GetLeaveStats()
         {

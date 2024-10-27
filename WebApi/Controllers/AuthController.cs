@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
@@ -151,6 +153,13 @@ namespace WebApi.Controllers
             await _context.SaveChangesAsync();
 
             return Ok("Leave application submitted.");
+        }
+
+        [HttpGet("/logout")]
+        public async Task<IActionResult> Logout()
+        {
+            return Ok(new {message = "Logged out successfully" });
+
         }
 
     }
