@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 using System.Text;
 using WebApi.Data;
@@ -114,7 +115,7 @@ namespace WebApi.Controllers
 
         [Authorize(Roles = "Employee")]
         [HttpPost("leaves/apply")]
-        public async Task<IActionResult> ApplyLeave(LeaveApplicationDto dto)
+        public async Task<IActionResult> ApplyLeave(ApplyLeaveDto dto)
         {
 
             //DateOnly.TryParseExact(...) is a static method that attempts to parse a date string into a DateOnly object.
@@ -153,6 +154,44 @@ namespace WebApi.Controllers
             await _context.SaveChangesAsync();
 
             return Ok("Leave application submitted.");
+        }
+
+        [Authorize(Roles ="Employee")]
+        [HttpGet("leave/stats")]
+        public async Task<IActionResult> GetLeaveStats()
+        {
+            var userId = User.Claims.First(c => c.Type == "UserId").Value;
+            var stats = await _context.LeaveApplications
+                .Where(l => l.UserId == int.Parse(userId))
+                .Where(l => l.Status == "Approved")
+                .GroupBy(l => l.LeaveType)
+                .Select(g => new
+                {
+                    LeaveType = g.Key.ToString(),
+                    Count = g.Count()
+                })
+                .ToListAsync();
+            return Ok(stats);
+        }
+
+        [Authorize(Roles ="Employee")]
+        [HttpGet("leaves")]
+        public async Task<IActionResult> GetLeaves()
+        {
+            var userId = User.Claims.First(c => c.Type == "UserId").Value;
+            var result = await _context.LeaveApplications
+                .Where(l => l.UserId == int.Parse(userId))
+                .Include(l => l.User)
+                .ToListAsync();
+
+            var applicationsDto = result.Select(a => new LeaveApplicationDto
+            {
+                StartDate = a.StartDate.ToString("yyyy/MM/dd"),
+                EndDate = a.EndDate.ToString("yyyy/MM/dd"),
+                LeaveType = a.LeaveType.ToString(),
+                Status = a.Status.ToString(),
+            });
+            return Ok(applicationsDto);
         }
 
         [HttpGet("/logout")]

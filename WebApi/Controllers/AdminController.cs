@@ -87,7 +87,7 @@ namespace WebApi.Controllers
                 .ToListAsync();
             //This ensures that the data sent to the client meets the expected format.
             //Leave enum 1 2 3 ma thiyo soo string ma pathauna yoo gareyko
-            var applicationsDto = applications.Select(a => new LeaveApplicationDto
+            var applicationsDto = applications.Select(a => new ApplyLeaveDto
             {
                 StartDate = a.StartDate.ToString("yyyy/MM/dd"),
                 EndDate = a.EndDate.ToString("yyyy/MM/dd"),
@@ -106,7 +106,7 @@ namespace WebApi.Controllers
                 .Include(l => l.User)
                 .ToListAsync();
             
-            var applicationsDto = result.Select(a => new LeaveApplicationDto
+            var applicationsDto = result.Select(a => new ApplyLeaveDto
             {
                 StartDate = a.StartDate.ToString("yyyy/MM/dd"),
                 EndDate = a.EndDate.ToString("yyyy/MM/dd"),
@@ -123,7 +123,7 @@ namespace WebApi.Controllers
                 .Include(l => l.User)
                 .ToListAsync();
             
-            var applicationsDto = result.Select(a => new LeaveApplicationDto
+            var applicationsDto = result.Select(a => new ApplyLeaveDto
             {
                 StartDate = a.StartDate.ToString("yyyy/MM/dd"),
                 EndDate = a.EndDate.ToString("yyyy/MM/dd"),
@@ -133,18 +133,18 @@ namespace WebApi.Controllers
             return Ok(applicationsDto);
         }
         
-        [HttpGet("leave/stats")]
-        public async Task<IActionResult> GetLeaveStats()
-        {
-            var stats = await _context.LeaveApplications
-                .GroupBy(l => l.LeaveType)
-                .Select(g => new
-                {
-                    LeaveType = g.Key.ToString(),
-                    Count = g.Count()
-                })
-                .ToListAsync();
-            return Ok(stats);
-        }
+        //[HttpGet("leave/stats")]
+        //public async Task<IActionResult> GetLeaveStats()
+        //{
+        //    var stats = await _context.LeaveApplications
+        //        .GroupBy(l => l.LeaveType)
+        //        .Select(g => new
+        //        {
+        //            LeaveType = g.Key.ToString(),
+        //            Count = g.Count()
+        //        })
+        //        .ToListAsync();
+        //    return Ok(stats);
+        //}
     }
 }

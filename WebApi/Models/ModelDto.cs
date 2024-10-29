@@ -19,7 +19,7 @@ namespace WebApi.Models
         public required string Password { get; set; }
     }
 
-    public class LeaveApplicationDto
+    public class ApplyLeaveDto
     {
         [Required(ErrorMessage = "StartDate is required.")]
         [RegularExpression(@"\d{4}/\d{2}/\d{2}", ErrorMessage = "StartDate must be in the format yyyy/MM/dd.")]
@@ -32,6 +32,18 @@ namespace WebApi.Models
         public string Username { get; set; }
         public int LeaveApplicationId { get; set; }
     }
+
+    public class LeaveApplicationDto
+    {
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
+        public string LeaveType { get; set; }
+        public string Status { get; set; }  // Only used when fetching leaves
+        public int LeaveApplicationId { get; set; }
+    }
+
+
+
 
     public class ApproveLeaveDto
     {
